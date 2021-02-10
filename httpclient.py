@@ -33,7 +33,19 @@ class HTTPResponse(object):
         self.body = body
 
 class HTTPClient(object):
-    #def get_host_port(self,url):
+
+    # https://docs.python.org/3/library/urllib.parse.html - information to parse url 
+    # Date Accessed: Feb.09.2021 
+    def get_host_port(self,url):
+        self.parse_info = urllib.parse.urlparse(url)
+        port = self.parse_info.port
+        host = self.parse_info.hostname
+
+        # In case port is not provided, default 80
+        if port == None:
+            port = 80
+
+        return host, port
 
     def connect(self, host, port):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -41,13 +53,13 @@ class HTTPClient(object):
         return None
 
     def get_code(self, data):
-        return None
+        return int(data.split(" ")[1])
 
     def get_headers(self,data):
         return None
 
     def get_body(self, data):
-        return None
+        return data.split("\r\n\r\n")[1]
     
     def sendall(self, data):
         self.socket.sendall(data.encode('utf-8'))
@@ -68,8 +80,23 @@ class HTTPClient(object):
         return buffer.decode('utf-8')
 
     def GET(self, url, args=None):
-        code = 500
-        body = ""
+        host, port = self.get_host_port(url)
+        path = self.parse_info.path
+
+        if path == "":
+            path = "/"
+
+        # print(f"host = {host}, port = {port}, path = {path}")
+
+        # call connect function to create socket & connect
+        self.connect(host, port)
+        self.sendall(f"GET {path} HTTP/1.1\r\nHost: {host}\r\nConnection: close\r\n\r\n")
+        received = self.recvall(self.socket)
+        self.socket.close()
+
+        code = self.get_code(received)
+        body = self.get_body(received)
+
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
