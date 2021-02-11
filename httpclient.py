@@ -86,22 +86,48 @@ class HTTPClient(object):
         if path == "":
             path = "/"
 
-        # print(f"host = {host}, port = {port}, path = {path}")
-
         # call connect function to create socket & connect
         self.connect(host, port)
-        self.sendall(f"GET {path} HTTP/1.1\r\nHost: {host}\r\nConnection: close\r\n\r\n")
+        self.sendall(f"GET {path} HTTP/1.1\r\nHost: {host}\r\nConnection: close \r\n\r\n")
         received = self.recvall(self.socket)
         self.socket.close()
 
         code = self.get_code(received)
         body = self.get_body(received)
 
+        print(received)
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
-        code = 500
-        body = ""
+        host, port = self.get_host_port(url)
+        path = self.parse_info.path
+
+        if path == "":
+            path = "/"
+
+        # https://docs.python.org/3/library/urllib.request.html#urllib-examples - how to deal with args in POST method
+        # Date Accessed: Feb.10.2021 
+        if args != None:
+            params = urllib.parse.urlencode(args)
+        else:
+            params = ""
+
+        content_length = len(params)
+        content_type =  "application/x-www-form-urlencoded"
+
+        # call connect function to create socket & connect
+        self.connect(host, port)
+        self.sendall(
+            f"POST {path} HTTP/1.1\r\nHost: {host}\r\nContent-Type: {content_type}\r\n" +
+            f"Content-Length: {content_length}\r\nConnection: close \r\n\r\n{params}"
+        )
+        received = self.recvall(self.socket)
+        self.socket.close()
+        
+        code = self.get_code(received)
+        body = self.get_body(received)
+        
+        print(received)
         return HTTPResponse(code, body)
 
     def command(self, url, command="GET", args=None):

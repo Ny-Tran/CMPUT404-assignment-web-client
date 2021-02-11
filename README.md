@@ -18,3 +18,13 @@ examples thus some of the code is Copyright © 2001-2013 Python
 Software Foundation; All Rights Reserved under the PSF license (GPL
 compatible) http://docs.python.org/2/library/socketserver.html
 
+REFERENCES 
+========================
+
+1. Learning and understanding information on how to parse url:
+    * https://docs.python.org/3/library/urllib.parse.html
+    * Date Accessed: Feb.09.2021 
+
+2. Learning how to deal with args in POST method:
+    * https://docs.python.org/3/library/urllib.request.html#urllib-examples
+    * Date Accessed: Feb.10.2021 
